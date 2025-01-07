@@ -24,11 +24,11 @@
 <!-- Styling -->
  <script>
 var BorderWidth = 2;
-var ImgWidth0 = 580;
-var ImgWidth1 = 576;
+var ImgWidth0 = 520;
+var ImgWidth1 = 516;
 </script>
 <style>
-img:hover{border: 2px solid #00ffff;width: 576px;}
+img:hover{border: 2px solid #00ffff;width: 516px;}
 body{background-color:#808080;}
 </style>
     
@@ -103,7 +103,7 @@ async function WriteTaskIO() {
 // Specify the EnterFullscreen event
 var EnterFullscreen = {
     type: jsPsychFullscreen,
-    message: '<p style="color:black;font-size:40px;">Just a few more trials to go. This will only take 1 extra minute.</p><p style="color:black;font-size:40px;">You will not get any feedback on these trials.</p><p style="color:black;font-size:40px;">Please try to respond to each one, even if you have to guess.</p><p style="color:black;font-size:40px;">Click the button below to continue.</p>',
+    message: '<p style="color:black;font-size:30px;">Just a few more trials to go. This will only take 1 extra minute.</p><p style="color:black;font-size:30px;">You will not get any feedback on these trials.</p><p style="color:black;font-size:30px;">Please try to respond to each one, even if you have to guess.</p><p style="color:black;font-size:30px;">Click the button below to continue.</p>',
     fullscreen_mode: true,
     delay_after: 1000,
     on_finish: function() {EnforceUnfocus = true;}

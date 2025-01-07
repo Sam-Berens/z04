@@ -129,12 +129,12 @@ var Feedback = {
     stimulus: function() {
         if (ResponseMade) {
             if (Correct) {
-                return '<p style="vertical-align:middle; margin: 0px 5px 30px; color:#00ff00; font-size:180px">&#10003;</p>';
+                return '<p style="vertical-align:middle; margin: 0px 5px 30px; color:#00ff00; font-size:100px">&#10003;</p>';
             } else {
-                return '<p style="vertical-align:middle; margin: 0px 5px 30px; color:#ff0000; font-size:180px">&#10060;</p>';
+                return '<p style="vertical-align:middle; margin: 0px 5px 30px; color:#ff0000; font-size:100px">&#10060;</p>';
             }
         } else {
-            return '<p style="vertical-align:middle;color:#ff0000;font-size:60px">Please try to respond on time!</p>';
+            return '<p style="vertical-align:middle;color:#ff0000;font-size:40px">Please try to respond on time!</p>';
         }
     },
     
