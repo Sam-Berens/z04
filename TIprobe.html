@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TI Probe</title>
+
+<!-- Set the favicon logo -->
+<link rel="icon" href="./Logo.png" type="image/x-icon" />
+
+<!-- Unpack the main JSpsych module -->
+<script src="https://unpkg.com/jspsych@7.3.3"></script>
+
+<!-- JSpsych dependency to fullscreen -->
+<script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.1.2"></script>
+
+<!-- JSpsych dependency for HTML button response -->
+<script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+
+<!-- JSpsych dependency for preloading -->
+<script src="https://unpkg.com/@jspsych/plugin-preload@1.1.2"></script>
+
+<!-- JSpsych dependency for styling -->
+<link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" />
+
+<!-- More styling -->
+<style>
+body{background-color:#808080;}
+img:hover{border: 1px solid #00ffff;width: 648px;}
+</style>
+    
+<script>
+// --- TaskIO SETUP ---
+var TaskIO = {};
+TaskIO.SubjectId = null;
+TaskIO.DateTime_Start = null;
+TaskIO.ClientTimeZone = null;
+TaskIO.Pairs = {};
+TaskIO.Trials = [];
+</script>
+
+<!-- Get participant IDs passed in from URL -->
+<script src="./Assets/GetPpantIds.js"></script>
+
+<!-- Get DateTime_Start and ClientTimeZone (and add to TaskIO)  -->
+<script src="./Assets/SetDateTime.js"></script>
+
+<!-- Exclusion check -->
+<script src="./Assets/ExclusionCheck.js"></script>
+
+<!-- Import unfocus checking -->
+<script src="./LogUnfocus.js"></script>
+  
+<script>
+// Function to get the stimulus assignments
+async function GetAssignment(){
+    var Data = {};
+	Data.SubjectId = SubjectId;
+
+	//Send data to php script
+	var P1 = await fetch('./GetAssignment.php', {
+		method: 'post',
+		headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+		body: JSON.stringify(Data)
+	});
+
+    // Return the result
+    var Result = await P1.json();
+    return Result.Assignment;
+}
+  
+// Function to shuffle an array (used in GetTimelineVars)
+function Shuffle(array) {
+    let currentIndex = array.length,  randomIndex;
+    
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+    
+// Function to get the timeline variables
+async function GetTimelineVars() {
+    var Timeline = [];
+    for (iRep = 0; iRep < 2; iRep++) { /////////////////////////////////////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        var Order = [0,1,2,3,4,5,6,7];
+        Shuffle(Order);
+        for (iOrder = 0; iOrder < 8; iOrder++) {
+            var cPairId = Pairs[Order[iOrder]].PairId;
+            var cPos = Pairs[Order[iOrder]].Pos;
+            var cNeg = Pairs[Order[iOrder]].Neg;
+            var cP1 = await fetch('./Assets/RandBit.php');
+            var cBit = await cP1.json();
+            cBit = cBit==1;
+            Timeline.push({PairId:cPairId,Pos:cPos,Neg:cNeg,PosOnRight:cBit});
+        }
+    }
+    return Timeline;
+}
+
+// Function to save the TaskIO variable
+async function WriteTaskIO() {
+    var Data = {};
+    Data.FunctionCall = 'WriteTIprobeIO';
+	Data.SubjectId = SubjectId;
+    Data.ClientTimeZone = ClientTimeZone;
+    Data.TIprobeIO = JSON.stringify(TaskIO);
+
+    //Send data to php script
+	var P1 = await fetch('./WriteXIO.php', {
+		method: 'post',
+		headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+		body: JSON.stringify(Data)
+	});
+
+    // Return the result
+    var Result = await P1.json();
+    return Result.TargetUrl;
+}
+
+// Import the main jsPsych object
+const jsPsych = initJsPsych({
+    on_finish: function() {
+        WriteTaskIO().then(function(P1) {
+            TargetUrl = P1.TargetUrl;
+            window.location.replace(TargetUrl);
+        }).catch(function(Err) {
+            alert('An error has occurred.\nPlease report error code #200 to the experimenter:\n'+Err);
+            window.location.replace("./Error.html");
+        });
+    }
+});
+
+// Set some global variables that are available in all functions
+// High-level global variables
+var Assignment;
+var Pairs = [];
+var TimelineVars;
+
+// Trial specific global variables
+var PairId = null;
+var PosOnRight = null;
+var StartTimeOfTrial = null;
+var SelectedRight = null;
+var Correct = null;
+var RT = null;
+var ResponseMade = false;
+
+// Function to set what happens when an image is clicked
+function ImgClicked(Id) {
+    
+    if(!ResponseMade) {
+        // If no response was made previously (i.e., this is the first click)...
+        
+        // Set the response time
+        RT = jsPsych.getTotalTime() - StartTimeOfTrial;
+        
+        // Set SelectedRight
+        if (Id=="ImgLeft") {
+            SelectedRight = false;
+        } else {
+            SelectedRight = true;
+        }
+        
+        // Combine PosOnRight and SelectedRight to set Correct
+        Correct = !(PosOnRight^SelectedRight);
+        
+        // Change the appearance of the stimuli
+        document.getElementById(Id).style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #0000ff; width: 648px;";
+        if (Id=='ImgLeft') {
+            document.getElementById('ImgRight').style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #808080; width: 648px;";
+        } else {
+            document.getElementById('ImgLeft').style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #808080; width: 648px;";
+        }
+        
+        // Set ResponseMade to be true so that the above code cannot be run again during the current trial
+        ResponseMade = true;
+    }
+}
+
+// Specify the preload event
+var ImgsToPreload = [
+    './Imgs/l00.png',
+    './Imgs/l01.png',
+    './Imgs/l02.png',
+    './Imgs/l03.png',
+    './Imgs/l04.png',
+    './Imgs/l05.png',
+    './Imgs/h00.png',
+    './Imgs/h01.png',
+    './Imgs/h02.png',
+    './Imgs/h03.png',
+    './Imgs/h04.png',
+    './Imgs/h05.png'
+    ];
+var PreloadImgs = {
+    type: jsPsychPreload,
+    images: ImgsToPreload
+};
+
+// Specify the EnterFullscreen event
+var EnterFullscreen = {
+    type: jsPsychFullscreen,
+    message: '<p style="color:black;font-size:40px;">Just a few more trials to go. This will only take 1 extra minute.</p><p style="color:black;font-size:40px;">You will not get any feedback on these trials.</p><p style="color:black;font-size:40px;">Please try to respond to each one, even if you have to guess.</p><p style="color:black;font-size:40px;">Click the button below to continue.</p>',
+    fullscreen_mode: true,
+    delay_after: 1000,
+    on_finish: function() {EnforceUnfocus = true;}
+};
+
+// Specify the ExitFullscreen event
+var ExitFullscreen = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: false,
+    on_finish: function() {EnforceUnfocus = false;}
+};
+
+// Specify the Fixation event
+var Fixation = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: '<p><font color="#000000" size="60px">+</font></p>',
+    choices: [],
+    prompt: "",
+    trial_duration: 1000,
+    
+    // Reset all the global variables (on_start is called at the beginning of the trial)
+    on_start: function() {
+        PairId = jsPsych.timelineVariable('PairId');
+        PosOnRight = jsPsych.timelineVariable('PosOnRight');
+        ResponseMade = false;
+        SelectedRight = null;
+        Correct = null;
+        RT = null;
+    }
+};
+
+// Specify the Trial event
+var Trial = {
+    
+    // Set the start time of this trial
+    on_start: function() {
+        StartTimeOfTrial = jsPsych.getTotalTime();
+    },
+    
+    // Set the type of this trial
+    type: jsPsychHtmlButtonResponse,
+    
+    // Set the stimuli to display
+    stimulus: function(){
+        // Specify the individual part of the stimulus HTML string
+        var Part1 = '<img src="';
+        var Part3 = '" width="650" style="vertical-align:middle;margin:0px 60px" id="ImgLeft" onclick="javascript:ImgClicked(this.id)"> <img src="';
+        var Part5 = '" width="650" style="vertical-align:middle;margin:0px 60px" id="ImgRight" onclick="javascript:ImgClicked(this.id)">';
+        var Pos = jsPsych.timelineVariable('Pos');
+        var Neg = jsPsych.timelineVariable('Neg');
+        
+        // Construct the StimString based on the value of PosOnRight
+        if (jsPsych.timelineVariable('PosOnRight')){
+            var StimString = Part1+Neg+Part3+Pos+Part5;
+        } else {
+            var StimString = Part1+Pos+Part3+Neg+Part5;
+        }
+        return StimString;
+        },
+    
+    // Set the choices and prompt fields to be empty (we don't use them)
+    choices: [],
+    prompt: "",
+    
+    // Set the trial duration
+    trial_duration: 4000,
+    
+    // At the end of the trial, push the results into TaskIO.Trials
+    on_finish: function() {
+        var TrialObj = {
+            PairId: PairId,
+            PosOnRight: PosOnRight,
+            ResponseMade: ResponseMade,
+            Correct: Correct,
+            RT: RT
+        };
+        TaskIO.Trials.push(TrialObj);
+    }
+};
+
+// Chain together the following...
+// ... 1) GetAssignment()
+// ... 2) Make the Pairs variable
+// ... 3) GetTimelineVars()
+// ... 4) Make the TrialLoop
+// ... 5) Call jsPsych.run([TrialLoop])
+async function StartUp() {
+    // (1)...
+    Assignment = await GetAssignment();
+
+    // (2)...
+    for (iPair = 0; iPair < 5; iPair++){
+        var Pos = 't'+String.fromCharCode(65+iPair);
+        var Neg = 't'+String.fromCharCode(66+iPair);
+        Pairs.push({PairId:iPair,Pos:Assignment[Pos],Neg:Assignment[Neg]});
+    }
+    Pairs.push({
+        PairId:5,
+        Pos:Assignment['tB'],
+        Neg:Assignment['tD']
+    });
+    Pairs.push({
+        PairId:6,
+        Pos:Assignment['tC'],
+        Neg:Assignment['tE']
+    });
+    Pairs.push({
+        PairId:7,
+        Pos:Assignment['tB'],
+        Neg:Assignment['tE']
+    });
+    TaskIO.Pairs = Pairs;
+
+    // (3)...
+    TimelineVars = await GetTimelineVars();
+
+    // (4)...
+    var TrialLoop = {
+        timeline: [Fixation,Trial],
+        timeline_variables: TimelineVars,
+        randomize_order: false
+    };
+
+    // (5)...
+    jsPsych.run([PreloadImgs,EnterFullscreen,TrialLoop,ExitFullscreen]);
+}
+StartUp();
+
+</script>
+</head>
+<body>
+</body>
+</html>
