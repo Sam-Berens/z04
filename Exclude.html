@@ -55,6 +55,9 @@ function OnBodyLoad() {
         if (UserAgentResult.browser.name.includes('IE')){
     	    document.getElementById('Message').innerHTML = "<p>You are not able to run the experiment using Internet Explorer.<br /><br />Please download a newer web browser. We recommend <a href='https://www.google.com/chrome/'>Google Chrome</a>.</p>";
         }
+        if (UserAgentResult.browser.name.includes('Edge')){
+    	    document.getElementById('Message').innerHTML = "<p>You are not able to run the experiment using MS Edge.<br /><br />Please download a different web browser. We recommend <a href='https://www.google.com/chrome/'>Google Chrome</a>.</p>";
+        }
     } catch(Err) {
         if (UserAgentResult.browser.name == 'IE'){
 	        document.getElementById('Message').innerHTML = "<p>You are not able to run the experiment using Internet Explorer.<br /><br />Please download a newer web browser. We recommend <a href='https://www.google.com/chrome/'>Google Chrome</a>.</p>";
@@ -72,6 +75,8 @@ function LogExclusion() {
     Data.SubjectId = SubjectId;
     Data.OS = OsId;
     Data.Browser = BrowserId;
+    Data.ScreenWidth = window.screen.width;
+    Data.ScreenHeight = window.screen.height;
 
     fetch('./LogExclusion.php', {
 		method: 'post',
@@ -86,7 +91,7 @@ function LogExclusion() {
 <body onload="OnBodyLoad()">
 <div style="visibility:hidden;" id="MainDiv" class="w3-center">
 <h1>Sorry! &#129335;</h1>
-<div id='Message'><p>You are not able to run the experiment on this device.<br>Please use a laptop or desktop computer.</p></div>
+<div id='Message'><p>You are not able to run the experiment on this device.<br>Please use a laptop or desktop computer with a larger display.</p></div>
 </div>
 </body>
 </html>

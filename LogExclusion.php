@@ -22,13 +22,17 @@ $OS = $Input['OS'];
 $OS = mysqli_real_escape_string($Conn,$OS);
 $Browser = $Input['Browser'];
 $Browser = mysqli_real_escape_string($Conn,$Browser);
+$ScreenWidth = $Input['ScreenWidth'];
+$ScreenWidth = mysqli_real_escape_string($Conn,$ScreenWidth);
+$ScreenHeight = $Input['ScreenHeight'];
+$ScreenHeight = mysqli_real_escape_string($Conn,$ScreenHeight);
 
 // Generate DateTime_Exclude:
 $Now = new DateTimeImmutable("now", new DateTimeZone('Europe/London'));
 $DateTime_Exclude = $Now->format('Y-m-d\TH:i:s');
 
 // Create the SQL request
-$Sql = "INSERT INTO Exclusions (PoolId, SubjectId, OS, Browser, DateTime_Exclude) VALUES ('$PoolId', '$SubjectId', '$OS', '$Browser', '$DateTime_Exclude');";
+$Sql = "INSERT INTO Exclusions (PoolId, SubjectId, OS, Browser, ScreenWidth, ScreenHeight, DateTime_Exclude) VALUES ('$PoolId', '$SubjectId', '$OS', '$Browser', $ScreenWidth, $ScreenHeight, '$DateTime_Exclude');";
 
 // Run the query:
 if (!($Conn->query($Sql))) {
