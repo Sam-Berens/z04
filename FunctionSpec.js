@@ -51,11 +51,11 @@ function ImgClicked(Id) {
         Correct = !(PosOnRight^SelectedRight);
         
         // Change the appearance of the stimuli
-        document.getElementById(Id).style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #0000ff; width: 648px;";
+        document.getElementById(Id).style = `vertical-align:middle; margin: 0px 60px; border: ${BorderWidth}px solid #0000ff; width: ${ImgWidth1}px;`;
         if (Id=='ImgLeft') {
-            document.getElementById('ImgRight').style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #808080; width: 648px;";
+            document.getElementById('ImgRight').style = `vertical-align:middle; margin: 0px 60px; border: ${BorderWidth}px solid #808080; width: ${ImgWidth1}px;`;
         } else {
-            document.getElementById('ImgLeft').style = "vertical-align:middle; margin: 0px 60px; border: 1px solid #808080; width: 648px;";
+            document.getElementById('ImgLeft').style = `vertical-align:middle; margin: 0px 60px; border: ${BorderWidth}px solid #808080; width: ${ImgWidth1}px;`;
         }
         
         // Set ResponseMade to be true so that the above code cannot be run again during the current trial

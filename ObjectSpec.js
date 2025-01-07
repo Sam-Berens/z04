@@ -87,8 +87,8 @@ var Trial = {
     stimulus: function(){
         // Specify the individual part of the stimulus HTML string
         var Part1 = '<img src="';
-        var Part3 = '" width="650" style="vertical-align:middle;margin:0px 60px" id="ImgLeft" onclick="javascript:ImgClicked(this.id)"> <img src="';
-        var Part5 = '" width="650" style="vertical-align:middle;margin:0px 60px" id="ImgRight" onclick="javascript:ImgClicked(this.id)">';
+        var Part3 = `" width="${ImgWidth0}px" style="vertical-align:middle;margin:0px 60px" id="ImgLeft" onclick="javascript:ImgClicked(this.id)"> <img src="`;
+        var Part5 = `" width="${ImgWidth0}px" style="vertical-align:middle;margin:0px 60px" id="ImgRight" onclick="javascript:ImgClicked(this.id)">`;
         var Pos = jsPsych.timelineVariable('Pos');
         var Neg = jsPsych.timelineVariable('Neg');
         
