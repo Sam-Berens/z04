@@ -1,4 +1,4 @@
-CREATE TABLE `z04_DataStore`.`TItrainIO` (
+CREATE TABLE `X_DataStore`.`TItrainIO` (
     `SubjectId` TEXT NOT NULL,
     `DateTime_Write` DATETIME NULL DEFAULT NULL,
     `ClientTimeZone` TEXT NULL DEFAULT NULL,

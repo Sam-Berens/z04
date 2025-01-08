@@ -1,4 +1,4 @@
-CREATE TABLE `z04_DataStore`.`Exclusions` (
+CREATE TABLE `X_DataStore`.`Exclusions` (
     `PoolId` TEXT NULL DEFAULT NULL,
     `SubjectId` TEXT NULL DEFAULT NULL,
     `OS` TEXT NULL DEFAULT NULL,
