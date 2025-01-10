@@ -1,8 +1,7 @@
 // Import the main jsPsych object
 const jsPsych = initJsPsych({
     on_finish: function() {
-        WriteTaskIO().then(function(P1) {
-            TargetUrl = P1.TargetUrl;
+        WriteTaskIO().then(function(TargetUrl) {
             window.location.replace(TargetUrl);
         }).catch(function(Err) {
             alert('An error has occurred.\nPlease report error code #200 to the experimenter:\n'+Err);
